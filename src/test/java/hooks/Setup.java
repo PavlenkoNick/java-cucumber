@@ -30,9 +30,9 @@ public class Setup {
         // for debugging purpose sets Java logger level to a particular value
         // Java has 7 logger levels: SEVERE, WARNING, INFO, CONFIG, FINE, FINER, and FINEST. The default is INFO.
         Logger logger = Logger.getLogger("");
-        logger.setLevel(Level.FINE);
+        logger.setLevel(Level.INFO);
         Arrays.stream(logger.getHandlers()).forEach(handler -> {
-            handler.setLevel(Level.FINE);
+            handler.setLevel(Level.INFO);
         });
     }
 }
