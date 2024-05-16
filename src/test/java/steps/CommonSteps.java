@@ -386,10 +386,12 @@ public class CommonSteps {
     }
     public String getBrowserName() {
         Capabilities cap = ((RemoteWebDriver) driver).getCapabilities();
+        logger.info("Browser: " + cap.getBrowserName().toLowerCase());
         return cap.getBrowserName().toLowerCase();
     }
     public String getPlatformName() {
         Capabilities cap = ((RemoteWebDriver) driver).getCapabilities();
+        logger.info("Platform: " + cap.getPlatformName().name().toLowerCase());
         return cap.getPlatformName().name().toLowerCase();
     }
     public boolean browserIsChrome() {
