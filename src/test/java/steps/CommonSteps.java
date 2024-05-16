@@ -7,14 +7,14 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.apache.log4j.Logger;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CommonSteps {
 
@@ -372,6 +372,33 @@ public class CommonSteps {
     public final String locatorByText(String locator, String text) {
         return locator.replace("$1", text);
     }
+    @Then("assert an element {string} is disabled")
+    // verifies that an element, found by a locator, is disabled
+    public void assertElementIsEnabled(String locator) {
+        WebElement element = waitForIsPresented(locator);
+        assertFalse(element.isEnabled());
+    }
+    @Then("assert an element {string} is read only")
+    // verifies that an element, found by a locator, is read only
+    public void assertElementIsReadOnly(String locator) {
+        WebElement element = waitForIsPresented(locator);
+        assertEquals("true", element.getAttribute("readOnly"));
+    }
+    public String getBrowserName() {
+        Capabilities cap = ((RemoteWebDriver) driver).getCapabilities();
+        return cap.getBrowserName().toLowerCase();
+    }
+    public String getPlatformName() {
+        Capabilities cap = ((RemoteWebDriver) driver).getCapabilities();
+        return cap.getPlatformName().name().toLowerCase();
+    }
+    public boolean browserIsChrome() {
+        return getBrowserName().equalsIgnoreCase("chrome");
+    }
+    public boolean platformIsMac() {
+        return getPlatformName().equalsIgnoreCase("mac");
+    }
+
 
     // ===========================================================   TEXT IN AN ELEMENT   =========================================================== //
 
@@ -380,18 +407,13 @@ public class CommonSteps {
         waitForIsPresented(locator);
         WebElement foundElement = waitForIsPresented(locator);
         String res = foundElement.getText();
-        if (foundElement.getTagName().equals("input")) {
-            res =  foundElement.getAttribute("Value");
-            if (res == null) {
-                res = workaroundForWDBugOnMacWhenGetInputFieldValueAttribute(foundElement);
-            }
-        }
+        if (foundElement.getTagName().equals("input"))
+            res = browserIsChrome() && platformIsMac() ? workaroundForWDBugOnMacWhenGettingInputFieldValueAttribute(foundElement) : foundElement.getAttribute("Value");
         logger.info("a text '" + res + "' was gotten from " + locator);
         return res;
     }
-
     // https://issues.chromium.org/issues/40764357
-    private String workaroundForWDBugOnMacWhenGetInputFieldValueAttribute(WebElement element) {
+    private String workaroundForWDBugOnMacWhenGettingInputFieldValueAttribute(WebElement element) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         String res = js.executeScript("return arguments[0].value", element).toString();
         logger.info("a workaround for a WebDriver bug 'Unable to get attribute value for fields on the web application' was implemented");
@@ -408,9 +430,16 @@ public class CommonSteps {
     // clears an input field, found by a locator
     public void clearField(String locator) {
         WebElement foundElement = waitForIsVisible(locator);
-        foundElement.sendKeys(Keys.COMMAND + "a");
-        foundElement.sendKeys(Keys.CONTROL + "a");
-        foundElement.sendKeys(Keys.DELETE);
+//        if (browserIsChrome()) {
+//            // https://github.com/webdriverio/webdriverio/issues/5869
+//            // a workaround for a bug in Chrome WebDriver when .clear() doesn't clear an input field
+//            // as for May 2024, the bug is solved
+//            foundElement.sendKeys(Keys.COMMAND + "a");
+//            foundElement.sendKeys(Keys.CONTROL + "a");
+//            foundElement.sendKeys(Keys.DELETE);
+//        } else {
+            foundElement.clear();
+//        }
         logger.info("an element '" + locator + "' was cleared");
     }
     @Then("type {string} in {string}")

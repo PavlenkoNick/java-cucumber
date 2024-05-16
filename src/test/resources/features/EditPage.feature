@@ -7,7 +7,7 @@ Feature: EditPage feature
 
   Scenario Outline: Verify it is possible to enter a text in the "<Field name>" input field
     When Enters "<Full name>" into the "<Field name>" input field
-    Then "<Full name>" is in the "<Field name>" input field
+    Then "<Full name>" is presented in the "<Field name>" input field
 
     Examples:
       | Field name             | Full name |
@@ -15,14 +15,14 @@ Feature: EditPage feature
 
   Scenario Outline: Verify it is possible to append a text in the "<Field name>" input field
     When Appends a text "<Text to append>" into the "<Field name>" input field
-    Then "<Text to append>" contains is in the "<Field name>" input field
+    Then "<Text to append>" is presented in the "<Field name>" input field
 
     Examples:
       | Field name                           | Text to append                                       |
       | Append a text and press keyboard tab | Some text with numbers 123 and characters !@#$%^&*() |
 
   Scenario Outline: Verify it is possible to print out the content of the "<Field name>" input field
-    Then Prints out the content of the "<Field name>" input field
+    Then The content of the "<Field name>" input field is printed out
 
     Examples:
       | Field name                  |
@@ -37,7 +37,7 @@ Feature: EditPage feature
       | Clear the text |
 
   Scenario Outline: Verify the edit field "<Field name>" is disabled
-    Then Edit field "<Field name>" is disabled
+    Then Input field "<Field name>" is disabled
 
     Examples:
       | Field name                     |
