@@ -3,6 +3,7 @@ package steps;
 import hooks.Setup;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -12,11 +13,15 @@ import org.apache.log4j.Logger;
 
 import java.time.Duration;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class CommonSteps {
 
     public Integer DEFAULT_WAIT_TIMEOUT = 15;
     public Integer LONG_WAIT_TIMEOUT = 30;
     public Integer SHORT_WAIT_TIMEOUT = 10;
+    public final String aByText = "//a[text()='$1']";
     public Logger logger = Logger.getLogger(CommonSteps.class);
 
     public WebDriverWait wait;
@@ -25,6 +30,59 @@ public class CommonSteps {
     public CommonSteps() {
         driver = Setup.driver;
         wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_WAIT_TIMEOUT));
+    }
+
+    // =================================================================   BROWSER   ================================================================= //
+    @Given("open {string}")
+    // opens a page by URL
+    public void openUrl(String address) {
+        try {
+            logger.info("URL is opening: " + address);
+            driver.get(address);
+        } catch (RuntimeException e) {
+            // sometimes occurs 'java.lang.RuntimeException: org.openqa.selenium.WebDriverException: disconnected: not connected to DevTools'
+            logger.info(e + " in open_severalAttempts()");
+            logger.info("quiting WebDriver");
+            driver.quit();
+            // in this case, try once again
+            logger.info("setting WebDriver");
+            new Setup().setWebDriver();
+            logger.info("URL is opening: " + address);
+            driver.get(address);
+        }
+    }
+
+    public void refreshThePage() {
+        logger.info("The page will be reloaded: " + driver.getCurrentUrl());
+        driver.navigate().refresh();
+    }
+
+    @And("click back button")
+    // clicks on a back button in a browser
+    public void goBack() {
+        driver.navigate().back();
+    }
+
+    @Then("assert URL is equal to {string}")
+    // verifies that a URL of the current page is equal to a string
+    public void assertURLIsEqualTo(String text) {
+        String URL = driver.getCurrentUrl();
+        assertEquals(text, URL);
+    }
+
+    @Then("assert URL contains {string}")
+    // returns true if a URL of the current page contains a string
+    public boolean assertURLIsContains(String text) {
+        String currentURL = driver.getCurrentUrl();
+        return currentURL.contains(text.toLowerCase());
+    }
+
+    @Then("assert page title is {string}")
+    // verifies that a page title is equal to string
+    public void assertPageTitleIs(String currentTitle) {
+        String pageTitle = driver.getTitle();
+        logger.info("Page title is: '" + pageTitle);
+        assertEquals(currentTitle, pageTitle);
     }
 
     // ========================================================   WAIT (RETURN WEB ELEMENT  ) ======================================================== //
@@ -222,6 +280,10 @@ public class CommonSteps {
     }
 
     // =========================================================   ACTIONS WITH AN ELEMENT   ========================================================= //
+    @When("Clicks to the {string} link")
+    public void clicks_to_the_link(String link_name) {
+        clickTo(locatorByText(aByText, link_name));
+    }
 
     @When("click to {string}")
     // clicks to an element, found by a locator
@@ -307,5 +369,71 @@ public class CommonSteps {
         }
     }
 
+    public final String locatorByText(String locator, String text) {
+        return locator.replace("$1", text);
+    }
+
+    // ===========================================================   TEXT IN AN ELEMENT   =========================================================== //
+
+    // returns a text of an element, found by a locator
+    public String getElementText(String locator) {
+        waitForIsPresented(locator);
+        WebElement foundElement = waitForIsPresented(locator);
+        String res = foundElement.getText();
+        if (foundElement.getTagName().equals("input")) {
+            res =  foundElement.getAttribute("Value");
+            if (res == null) {
+                res = workaroundForWDBugOnMacWhenGetInputFieldValueAttribute(foundElement);
+            }
+        }
+        logger.info("a text '" + res + "' was gotten from " + locator);
+        return res;
+    }
+
+    // https://issues.chromium.org/issues/40764357
+    private String workaroundForWDBugOnMacWhenGetInputFieldValueAttribute(WebElement element) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        String res = js.executeScript("return arguments[0].value", element).toString();
+        logger.info("a workaround for a WebDriver bug 'Unable to get attribute value for fields on the web application' was implemented");
+        return res;
+    }
+    @And("send key {string} to {string}")
+    // sends keys to an element, found by a locator
+    public void sendKeyTo(String text, String locator) {
+        WebElement foundElement = driver.findElement(getByObject(locator));
+        foundElement.sendKeys(text);
+    }
+
+    @And("clear field {string}")
+    // clears an input field, found by a locator
+    public void clearField(String locator) {
+        WebElement foundElement = waitForIsVisible(locator);
+        foundElement.sendKeys(Keys.COMMAND + "a");
+        foundElement.sendKeys(Keys.CONTROL + "a");
+        foundElement.sendKeys(Keys.DELETE);
+        logger.info("an element '" + locator + "' was cleared");
+    }
+    @Then("type {string} in {string}")
+    // types a text in an element, found by a locator
+    public void typeIn(String text, String locator) {
+        // an element has to be not only visible but clickable in order to type in
+        waitForIsClickable(locator).sendKeys(text);
+        logger.info("a text '" + text + "' was typed into " + locator);
+    }
+    @Then("assert text {string} is in {string}")
+    // verifies that a text is in an element, found by a locator
+    public void assertTextIsIn(String text, String locator) {
+        String elementText = getElementText(locator);
+        String message = "Text '" + text + "' in " + locator + " is not presented. Actual text is '" + elementText + "'";
+        assertEquals(message, elementText);
+    }
+
+    @Then("assert text {string} is presented in {string}")
+    // verifies that a text is presented in an element, found by a locator
+    public void assertTextIsPresentedIn(String text, String locator) {
+        String elementText = getElementText(locator);
+        String message = "Text '" + text + "' in " + locator + " is not presented. Actual text is '" + elementText + "'";
+        assertTrue(message, elementText.contains(text));
+    }
 
 }
