@@ -41,7 +41,7 @@ public class CommonSteps {
             driver.get(address);
         } catch (RuntimeException e) {
             // sometimes occurs 'java.lang.RuntimeException: org.openqa.selenium.WebDriverException: disconnected: not connected to DevTools'
-            logger.info(e + " in open_severalAttempts()");
+            logger.info(e + " in openUrl()");
             logger.info("quiting WebDriver");
             driver.quit();
             // in this case, try once again
