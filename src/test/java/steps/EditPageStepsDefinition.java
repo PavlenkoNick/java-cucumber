@@ -1,5 +1,5 @@
 package steps;
 
-public class HomePageStepsDefinition {
+public class EditPageStepsDefinition {
     CommonSteps steps = new steps.CommonSteps();
 }
