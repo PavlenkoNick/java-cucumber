@@ -386,12 +386,12 @@ public class CommonSteps {
     }
     public String getBrowserName() {
         Capabilities cap = ((RemoteWebDriver) driver).getCapabilities();
-        logger.info("Browser: " + cap.getBrowserName().toLowerCase());
+//        logger.info("Browser: " + cap.getBrowserName().toLowerCase());
         return cap.getBrowserName().toLowerCase();
     }
     public String getPlatformName() {
         Capabilities cap = ((RemoteWebDriver) driver).getCapabilities();
-        logger.info("Platform: " + cap.getPlatformName().name().toLowerCase());
+//        logger.info("Platform: " + cap.getPlatformName().name().toLowerCase());
         return cap.getPlatformName().name().toLowerCase();
     }
     public boolean browserIsChrome() {
@@ -399,6 +399,9 @@ public class CommonSteps {
     }
     public boolean platformIsMac() {
         return getPlatformName().equalsIgnoreCase("mac");
+    }
+    public boolean platformIsLinux() {
+        return getPlatformName().equalsIgnoreCase("linux");
     }
 
 
@@ -410,7 +413,7 @@ public class CommonSteps {
         WebElement foundElement = waitForIsPresented(locator);
         String res = foundElement.getText();
         if (foundElement.getTagName().equals("input"))
-            res = browserIsChrome() && platformIsMac() ? workaroundForWDBugOnMacWhenGettingInputFieldValueAttribute(foundElement) : foundElement.getAttribute("Value");
+            res = browserIsChrome() && (platformIsMac() || platformIsLinux()) ? workaroundForWDBugOnMacWhenGettingInputFieldValueAttribute(foundElement) : foundElement.getAttribute("Value");
         logger.info("a text '" + res + "' was gotten from " + locator);
         return res;
     }
