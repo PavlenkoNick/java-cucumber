@@ -413,12 +413,12 @@ public class CommonSteps {
         WebElement foundElement = waitForIsPresented(locator);
         String res = foundElement.getText();
         if (foundElement.getTagName().equals("input"))
-            res = browserIsChrome() && (platformIsMac() || platformIsLinux()) ? workaroundForWDBugOnMacWhenGettingInputFieldValueAttribute(foundElement) : foundElement.getAttribute("Value");
+            res = browserIsChrome() ? workaroundForChromeWebDriverBugWhenGettingInputFieldValueAttribute(foundElement) : foundElement.getAttribute("Value");
         logger.info("a text '" + res + "' was gotten from " + locator);
         return res;
     }
     // https://issues.chromium.org/issues/40764357
-    private String workaroundForWDBugOnMacWhenGettingInputFieldValueAttribute(WebElement element) {
+    private String workaroundForChromeWebDriverBugWhenGettingInputFieldValueAttribute(WebElement element) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         String res = js.executeScript("return arguments[0].value", element).toString();
         logger.info("a workaround for a WebDriver bug 'Unable to get attribute value for fields on the web application' was implemented");
