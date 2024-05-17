@@ -36,20 +36,20 @@ public class CommonSteps {
     @Given("open {string}")
     // opens a page by URL
     public void openUrl(String address) {
-        try {
-            logger.info("URL is opening: " + address);
+//        try {
+//            logger.info("URL is opening: " + address);
             driver.get(address);
-        } catch (RuntimeException e) {
-            // sometimes occurs 'java.lang.RuntimeException: org.openqa.selenium.WebDriverException: disconnected: not connected to DevTools'
-            logger.info(e + " in openUrl()");
-            logger.info("quiting WebDriver");
-            driver.quit();
-            // in this case, try once again
-            logger.info("setting WebDriver");
-            new Setup().setWebDriver();
-            logger.info("URL is opening: " + address);
-            driver.get(address);
-        }
+//        } catch (RuntimeException e) {
+//            // sometimes occurs 'java.lang.RuntimeException: org.openqa.selenium.WebDriverException: disconnected: not connected to DevTools'
+//            logger.info(e + " in openUrl()");
+//            logger.info("quiting WebDriver");
+//            driver.quit();
+//            // in this case, try once again
+//            logger.info("setting WebDriver");
+//            new Setup().setWebDriver();
+//            logger.info("URL is opening: " + address);
+//            driver.get(address);
+//        }
     }
 
     public void refreshThePage() {
